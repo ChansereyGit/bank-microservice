@@ -1,0 +1,50 @@
+services:
+  accountsdb:
+    image: postgres:15-alpine
+    container_name: accountsdb
+    environment:
+      POSTGRES_DB: bank_account
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Admin
+    ports:
+      - "5432:5432"
+    networks:
+      - sereynetwork
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  configserver:
+    build:
+      context: ../../configserver
+      dockerfile: Dockerfile
+    ports:
+      - "8071:8071"
+    networks:
+      - sereynetwork
+
+  accounts:
+    build:
+      context: ../../account
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - sereynetwork
+    depends_on:
+      accountsdb:
+        condition: service_healthy
+      configserver:
+        condition: service_started
+    restart: on-failure
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+      SPRING_DATASOURCE_URL: jdbc:postgresql://accountsdb:5432/bank_account
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: Admin
+
+networks:
+  sereynetwork:
