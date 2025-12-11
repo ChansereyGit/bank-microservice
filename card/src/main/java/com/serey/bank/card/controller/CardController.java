@@ -36,11 +36,11 @@ public class CardController {
                 .body(cardService.getList());
     }
 
-    @GetMapping("{customerId}")
+    @GetMapping("/{customerId}")
     public ResponseEntity<List<Card>> getByCustomerId(
-            @RequestHeader("sereybank-correlation-id") String correlationId,
+//            @RequestHeader("sereybank-correlation-id") String correlationId,
             @PathVariable("customerId") Long customerId ) {
-        log.debug("Correlation Id found: {}", correlationId);
+//        log.debug("Correlation Id found: {}", correlationId);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(cardService.getByCustomerId(customerId));

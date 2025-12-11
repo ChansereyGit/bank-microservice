@@ -6,7 +6,7 @@ import java.time.LocalDate;
 
 @Data
 public class AccountDTO {
-    private Long accountNumber;
+    // accountNumber is auto-generated, don't include in create request
     private Long customerId;
     private String accountType;
     private String branchAddress;

@@ -9,7 +9,7 @@ public class AccountMapper {
 
     public Account toAccount(AccountDTO dto) {
         Account account = new Account();
-        account.setAccountNumber(dto.getAccountNumber());
+        // Don't set accountNumber - it's auto-generated
         account.setAccountType(dto.getAccountType());
         account.setBranchAddress(dto.getBranchAddress());
         account.setCreateDate(dto.getCreateDate());

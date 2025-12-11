@@ -15,9 +15,6 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long accountNumber;
 
-    @Version
-    private Long version;
-
     @ManyToOne
     @JoinColumn(name = "customerId")
     private Customer customer;

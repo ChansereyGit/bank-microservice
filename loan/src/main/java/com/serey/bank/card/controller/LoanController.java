@@ -36,9 +36,9 @@ public class LoanController {
 
     @GetMapping("{customerId}")
     public ResponseEntity<?> getByCustomerId(
-            @RequestHeader("sereybank-correlation-id") String correlationId,
+//            @RequestHeader("sereybank-correlation-id") String correlationId,
             @PathVariable("customerId") Long customerId) {
-        log.debug("Correlation Id found: {}", correlationId);
+//        log.debug("Correlation Id found: {}", correlationId);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(loanService.findByCustomerId(customerId));
