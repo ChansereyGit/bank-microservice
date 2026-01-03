@@ -1,0 +1,107 @@
+services:
+  configserver:
+    image: sereybank/configserver:latest
+    mem_limit: 700m
+    ports:
+      - "8070:8071"
+    networks:
+      - sereynetwork
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8071/application/default"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+  eurekaserver:
+    image: sereybank/eurekaserver:latest
+    mem_limit: 700m
+    ports:
+      - "9090:9000"
+    networks:
+      - sereynetwork
+    depends_on:
+      configserver:
+        condition: service_healthy
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    environment:
+      SPRING_PROFILES_ACTIVE: default
+      SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9000/"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+  account:
+    image: sereybank/account:latest
+    mem_limit: 700m
+    ports:
+      - "7070:8080"
+    networks:
+      - sereynetwork
+    depends_on:
+      configserver:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_healthy
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    environment:
+      SPRING_PROFILES_ACTIVE: default
+      SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:9000/eureka/
+  loan:
+    image: sereybank/loan:latest
+    mem_limit: 700m
+    ports:
+      - "6060:8090"
+    networks:
+      - sereynetwork
+    depends_on:
+      configserver:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_healthy
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    environment:
+      SPRING_PROFILES_ACTIVE: default
+      SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:9000/eureka/
+  card:
+    image: sereybank/card:latest
+    mem_limit: 700m
+    ports:
+      - "5050:8070"
+    networks:
+      - sereynetwork
+    depends_on:
+      configserver:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_he
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    environment:
+      SPRING_PROFILES_ACTIVE: default
+      SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:9000/eureka/
+networks:
+  sereynetwork:

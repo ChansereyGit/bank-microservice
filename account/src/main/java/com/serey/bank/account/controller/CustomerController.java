@@ -9,6 +9,8 @@ import com.serey.bank.account.mapper.CustomerMapper;
 import com.serey.bank.account.service.CustomerService;
 import com.serey.bank.account.service.client.CardFeignClient;
 import com.serey.bank.account.service.client.LoanFeignClient;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/customers")
 public class CustomerController {
@@ -26,11 +29,11 @@ public class CustomerController {
     @Autowired
     private CustomerMapper customerMapper;
 
-    @Autowired
-    private CardFeignClient cardFeignClient;
-
-    @Autowired
-    private LoanFeignClient loanFeignClient;
+//    @Autowired
+//    private CardFeignClient cardFeignClient;
+//
+//    @Autowired
+//    private LoanFeignClient loanFeignClient;
 
     @PostMapping
     public ResponseEntity<?> saveCustomer(@RequestBody CustomerDTO customerDTO) {
@@ -49,20 +52,23 @@ public class CustomerController {
         return ResponseEntity.ok(customerService.getById(customerId));
     }
 
-    @GetMapping("/customerDetail/{customerId}")
-    public ResponseEntity<CustomerDetailDTO> getCustomerDetail(@PathVariable Long customerId) {
-        CustomerDetailDTO dto = new CustomerDetailDTO();
-        Customer customer = customerService.getById(customerId);
-        if(customer == null) {
-            throw new RuntimeException("Customer not found with this ID");
-        }
-        CustomerDTO customerDTO = customerMapper.toCustomerDTO(customer);
-        List<LoanResponseDTO> loanInfo = loanFeignClient.getLoanInfo(customerId);
-        List<CardResponseDTO> cardInfo = cardFeignClient.getCardInfo(customerId);
-        dto.setCustomer(customerDTO);
-        dto.setLoans(loanInfo);
-        dto.setCards(cardInfo);
-
-        return ResponseEntity.ok(dto);
-    }
+//    @CircuitBreaker(name = "customerDetailSupport")
+//    @GetMapping("/customerDetail/{customerId}")
+//    public ResponseEntity<CustomerDetailDTO> getCustomerDetail(@RequestHeader("sereybank-correlation-id") String correlationId,
+//                                                               @PathVariable Long customerId) {
+//        log.debug("correlation id found: {}", correlationId);
+//        CustomerDetailDTO dto = new CustomerDetailDTO();
+//        Customer customer = customerService.getById(customerId);
+//        if(customer == null) {
+//            throw new RuntimeException("Customer not found with this ID");
+//        }
+//        CustomerDTO customerDTO = customerMapper.toCustomerDTO(customer);
+//        List<LoanResponseDTO> loanInfo = loanFeignClient.getLoanInfo(correlationId, customerId);
+//        List<CardResponseDTO> cardInfo = cardFeignClient.getCardInfo(correlationId, customerId);
+//        dto.setCustomer(customerDTO);
+//        dto.setLoans(loanInfo);
+//        dto.setCards(cardInfo);
+//
+//        return ResponseEntity.ok(dto);
+//    }
 }
